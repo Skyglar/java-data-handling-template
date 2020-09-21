@@ -1,5 +1,9 @@
 package com.epam.izh.rd.online.repository;
 
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 public class SimpleFileRepository implements FileRepository {
 
     /**
@@ -10,7 +14,18 @@ public class SimpleFileRepository implements FileRepository {
      */
     @Override
     public long countFilesInDirectory(String path) {
-        return 0;
+        File dir = new File(path);
+        long count = 0;
+
+        File[] files = dir.listFiles();
+        for (File file: files) {
+            if (file.isDirectory()) {
+                count += countFilesInDirectory(file.getPath());
+            } else {
+                count++;
+            }
+        }
+        return count;
     }
 
     /**
@@ -21,7 +36,20 @@ public class SimpleFileRepository implements FileRepository {
      */
     @Override
     public long countDirsInDirectory(String path) {
-        return 0;
+        long count = 0;
+
+        try {
+            count = Files.find(
+                    Paths.get(path),
+                    10,  // how deep do we want to descend
+                    (src, attributes) -> attributes.isDirectory()
+            ).count();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return count;
     }
 
     /**
@@ -32,7 +60,28 @@ public class SimpleFileRepository implements FileRepository {
      */
     @Override
     public void copyTXTFiles(String from, String to) {
-        return;
+        File dir = new File(from);
+        File[] files = dir.listFiles((dir1, name) -> name.endsWith(".txt"));
+
+        try {
+            for (File file: files) {
+                Reader reader = new FileReader(file);
+                Writer writer = new BufferedWriter(
+                        new FileWriter(new File(to + "/" + file.getName())));
+
+                int data;
+                while ((data = reader.read()) != -1) {
+                    writer.write(data);
+                }
+
+                reader.close();
+                writer.close();
+            }
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -44,6 +93,11 @@ public class SimpleFileRepository implements FileRepository {
      */
     @Override
     public boolean createFile(String path, String name) {
+        try {
+            return new File(String.format("%s/%s.txt", path, name)).createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return false;
     }
 
@@ -55,6 +109,22 @@ public class SimpleFileRepository implements FileRepository {
      */
     @Override
     public String readFileFromResources(String fileName) {
-        return null;
+        String from = String.format("src/main/resources/%s", fileName);
+        StringBuilder str = new StringBuilder();
+
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(from));
+
+            String line;
+            while ((line = reader.readLine()) != null ) {
+                str.append(line);
+            }
+
+            reader.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return str.toString();
     }
 }
