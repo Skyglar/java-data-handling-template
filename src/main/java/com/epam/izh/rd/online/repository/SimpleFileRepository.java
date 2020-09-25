@@ -2,9 +2,12 @@ package com.epam.izh.rd.online.repository;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class SimpleFileRepository implements FileRepository {
+
+    private final String RESOURCES = "src/main/resources/";
 
     /**
      * Метод рекурсивно подсчитывает количество файлов в директории
@@ -14,13 +17,13 @@ public class SimpleFileRepository implements FileRepository {
      */
     @Override
     public long countFilesInDirectory(String path) {
-        File dir = new File(path);
+        File dir = new File(RESOURCES + path);
         long count = 0;
 
         File[] files = dir.listFiles();
-        for (File file: files) {
-            if (file.isDirectory()) {
-                count += countFilesInDirectory(file.getPath());
+        for (int i = 0; i < files.length; i++) {
+            if (files[i].isDirectory()) {
+                count += countFilesInDirectory(path + "/" + files[i].getName());
             } else {
                 count++;
             }
@@ -40,7 +43,7 @@ public class SimpleFileRepository implements FileRepository {
 
         try {
             count = Files.find(
-                    Paths.get(path),
+                    Paths.get(RESOURCES + path),
                     10,  // how deep do we want to descend
                     (src, attributes) -> attributes.isDirectory()
             ).count();
@@ -93,8 +96,18 @@ public class SimpleFileRepository implements FileRepository {
      */
     @Override
     public boolean createFile(String path, String name) {
+        String absolutePath = RESOURCES + path;
         try {
-            return new File(String.format("%s/%s.txt", path, name)).createNewFile();
+            Path p = Paths.get(absolutePath);
+            boolean isDirExists = Files.exists(p);
+
+            if (!isDirExists) {
+                new File(absolutePath).mkdirs();
+            }
+
+            if (isDirExists) {
+                return new File(String.format("%s%s/%s", RESOURCES, path, name)).createNewFile();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

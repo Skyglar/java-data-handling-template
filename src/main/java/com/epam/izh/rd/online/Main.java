@@ -7,14 +7,20 @@ import java.io.*;
 public class Main {
     public static void main(String... args) throws IOException{
         final String resources = "src/main/resources/";
+        final String TEST_DIR_CREATE_PATH = "testDirCreateFile";
+        final String TEST_FILE_TO_CREATE = "newFile.txt";
+        final String TEST_DIR_COUNT_PATH = "testDirCountFiles";
         String to = String.format("%stestDirCountFiles/dir1", resources);
         String copy1 = String.format("%sGuardians of the Galaxy.mp3", resources);
         String copy2 = String.format("%sGuardians of the Galaxy2.mp3", resources);
         File dir = new File(resources);
 
         SimpleFileRepository repo = new SimpleFileRepository();
+        //repo.countFilesInDirectory(TEST_DIR_COUNT_PATH);
+        repo.createFile(TEST_DIR_CREATE_PATH, TEST_FILE_TO_CREATE);
 
-        System.out.println(repo.readFileFromResources("readme.txt"));
+
+
 
 
 
