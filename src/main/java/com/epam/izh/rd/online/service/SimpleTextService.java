@@ -1,5 +1,7 @@
 package com.epam.izh.rd.online.service;
 
+import java.util.regex.Pattern;
+
 public class SimpleTextService implements TextService {
 
     /**
@@ -13,7 +15,7 @@ public class SimpleTextService implements TextService {
      */
     @Override
     public String removeString(String base, String remove) {
-        return null; //TODO
+        return Pattern.compile(remove).matcher(base).replaceAll("");
     }
 
     /**
@@ -24,7 +26,7 @@ public class SimpleTextService implements TextService {
      */
     @Override
     public boolean isQuestionString(String text) {
-        return false; //TODO
+        return text.endsWith("?");
     }
 
     /**
@@ -35,7 +37,11 @@ public class SimpleTextService implements TextService {
      */
     @Override
     public String concatenate(String... elements) {
-        return null; //TODO
+        StringBuilder con = new StringBuilder();
+        for (String s: elements) {
+            con.append(s);
+        }
+        return con.toString();
     }
 
     /**
@@ -47,7 +53,35 @@ public class SimpleTextService implements TextService {
      */
     @Override
     public String toJumpCase(String text) {
-        return null; //TODO
+        if (text.isEmpty()) {
+            return "";
+        }
+
+        char[] chars = text.toCharArray();
+        if (isUpperCase(chars[0])) {
+            chars[0] = (char) (chars[0] + 32);
+        }
+
+        for (int i = 1; i < chars.length; i++) {
+            if (i % 2 != 0) {
+                if (!isUpperCase(chars[i]) && !isSpace(chars[i])) {
+                    chars[i] = (char) (chars[i] - 32);
+                }
+            } else {
+                if (isUpperCase(chars[i]) && !isSpace(chars[i])) {
+                    chars[i] = (char) (chars[i] + 32);
+                }
+            }
+        }
+        return new String(chars); //TODO
+    }
+
+    private boolean isUpperCase(char c) {
+        return c >= 65 && c <= 90;
+    }
+
+    private boolean isSpace(char c) {
+        return c == 32;
     }
 
     /**
@@ -59,6 +93,20 @@ public class SimpleTextService implements TextService {
      */
     @Override
     public boolean isPalindrome(String string) {
-       return false; //TODO
+        if (string.isEmpty()) {
+            return false;
+        }
+        return new StringBuilder(string).reverse().toString().replaceAll("\\s", "")
+               .equalsIgnoreCase(string.replaceAll("\\s", ""));
+    }
+
+    public static void main(String[] args) {
+        String str = "Hello, hello, hello, how low!";
+        String remove = ", he";
+        String pali = "а роза упала на лапу Азора";
+        String jump = "Load Up On Guns And Bring Your Friends";
+        SimpleTextService text = new SimpleTextService();
+
+        System.out.println(text.toJumpCase(jump));
     }
 }
